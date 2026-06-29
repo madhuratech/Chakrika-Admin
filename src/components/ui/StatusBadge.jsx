@@ -6,10 +6,13 @@ const statusConfig = {
   // Order
   pending:    { label: 'Pending',    bg: '#fffbeb', text: '#b45309' },
   confirmed:  { label: 'Confirmed',  bg: '#eff6ff', text: '#1d4ed8' },
+  processing: { label: 'Processing', bg: '#f8fafc', text: '#64748b' },
   packed:     { label: 'Packed',     bg: '#f5f3ff', text: '#6d28d9' },
   shipped:    { label: 'Shipped',    bg: '#eef2ff', text: '#4338ca' },
+  in_transit: { label: 'In Transit', bg: '#fff7ed', text: '#c2410c' },
   delivered:  { label: 'Delivered',  bg: '#f0fdf4', text: '#15803d' },
   cancelled:  { label: 'Cancelled',  bg: '#fef2f2', text: '#dc2626' },
+  refunded:   { label: 'Refunded',   bg: '#fdf2f8', text: '#be185d' },
   // Coupon
   expired:    { label: 'Expired',    bg: '#fff7ed', text: '#c2410c' },
   used_up:    { label: 'Used Up',    bg: '#fef2f2', text: '#dc2626' },

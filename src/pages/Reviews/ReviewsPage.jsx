@@ -32,9 +32,9 @@ const StarRating = ({ rating, size = 14 }) => (
 )
 
 const STATUS_MAP = {
-  pending:  { bg: '#fffbeb', color: '#d97706', label: 'Pending'  },
-  approved: { bg: '#f0fdf4', color: '#16a34a', label: 'Approved' },
-  rejected: { bg: '#fef2f2', color: '#dc2626', label: 'Rejected' },
+  Pending:  { bg: '#fffbeb', color: '#d97706', label: 'Pending'  },
+  Approved: { bg: '#f0fdf4', color: '#16a34a', label: 'Approved' },
+  Rejected: { bg: '#fef2f2', color: '#dc2626', label: 'Rejected' },
 }
 
 const ReviewsPage = () => {
@@ -50,7 +50,7 @@ const ReviewsPage = () => {
   const fetch = async () => {
     setLoading(true)
     try {
-      const res = await apiService.get('/reviews')
+      const res = await apiService.get('/admin/product-reviews')
       setReviews(Array.isArray(res.data) ? res.data : [])
     } catch {
       toast.error('Failed to load reviews')
@@ -73,25 +73,25 @@ const ReviewsPage = () => {
 
   const handleApprove = async (review) => {
     try {
-      await apiService.patch(`/reviews/${review.id}/status`, { status: 'approved' })
-      setReviews(prev => prev.map(r => r.id === review.id ? { ...r, status: 'approved' } : r))
-      if (selected?.id === review.id) setSelected(p => ({ ...p, status: 'approved' }))
+      await apiService.patch(`/admin/product-reviews/${review.id}/status`, { status: 'Approved' })
+      setReviews(prev => prev.map(r => r.id === review.id ? { ...r, status: 'Approved' } : r))
+      if (selected?.id === review.id) setSelected(p => ({ ...p, status: 'Approved' }))
       toast.success('Review approved')
     } catch { toast.error('Failed to update') }
   }
 
   const handleReject = async (review) => {
     try {
-      await apiService.patch(`/reviews/${review.id}/status`, { status: 'rejected' })
-      setReviews(prev => prev.map(r => r.id === review.id ? { ...r, status: 'rejected' } : r))
-      if (selected?.id === review.id) setSelected(p => ({ ...p, status: 'rejected' }))
+      await apiService.patch(`/admin/product-reviews/${review.id}/status`, { status: 'Rejected' })
+      setReviews(prev => prev.map(r => r.id === review.id ? { ...r, status: 'Rejected' } : r))
+      if (selected?.id === review.id) setSelected(p => ({ ...p, status: 'Rejected' }))
       toast.success('Review rejected')
     } catch { toast.error('Failed to update') }
   }
 
   const confirmDelete = async () => {
     try {
-      await apiService.delete(`/reviews/${selected.id}`)
+      await apiService.delete(`/admin/product-reviews/${selected.id}`)
       setReviews(prev => prev.filter(r => r.id !== selected.id))
       toast.success('Review deleted')
       setIsDeleteOpen(false)
@@ -121,7 +121,7 @@ const ReviewsPage = () => {
           <SearchBar placeholder="Search by customer, product, comment…" value={search} onChange={setSearch} />
         </div>
         {[
-          { value: statusFilter, onChange: setStatusFilter, options: [['all','All Statuses'],['pending','Pending'],['approved','Approved'],['rejected','Rejected']] },
+          { value: statusFilter, onChange: setStatusFilter, options: [['all','All Statuses'],['Pending','Pending'],['Approved','Approved'],['Rejected','Rejected']] },
           { value: ratingFilter, onChange: setRatingFilter, options: [['all','All Ratings'],['5','★★★★★'],['4','★★★★'],['3','★★★'],['2','★★'],['1','★']] },
         ].map((sel, i) => (
           <select key={i} value={sel.value} onChange={e => sel.onChange(e.target.value)} style={{
@@ -154,7 +154,7 @@ const ReviewsPage = () => {
             </thead>
             <tbody>
               {filtered.map((rev, i) => {
-                const s = STATUS_MAP[rev.status] || STATUS_MAP.pending
+                const s = STATUS_MAP[rev.status] || STATUS_MAP.Pending;
                 return (
                   <motion.tr
                     key={rev.id}
@@ -192,8 +192,8 @@ const ReviewsPage = () => {
                     <td style={{ padding: '12px 16px' }}>
                       <div style={{ display: 'flex', gap: 4 }}>
                         <ActionBtn title="View" onClick={() => { setSelected(rev); setIsViewOpen(true) }} color="var(--primary)"><Eye size={13} /></ActionBtn>
-                        {rev.status !== 'approved' && <ActionBtn title="Approve" onClick={() => handleApprove(rev)} color="#16a34a"><CheckCircle size={13} /></ActionBtn>}
-                        {rev.status !== 'rejected' && <ActionBtn title="Reject"  onClick={() => handleReject(rev)}  color="#dc2626"><XCircle size={13} /></ActionBtn>}
+                        {rev.status !== 'Approved' && <ActionBtn title="Approve" onClick={() => handleApprove(rev)} color="#16a34a"><CheckCircle size={13} /></ActionBtn>}
+                        {rev.status !== 'Rejected' && <ActionBtn title="Reject"  onClick={() => handleReject(rev)}  color="#dc2626"><XCircle size={13} /></ActionBtn>}
                         <ActionBtn title="Delete"  onClick={() => { setSelected(rev); setIsDeleteOpen(true) }} color="#ef4444"><Trash2 size={13} /></ActionBtn>
                       </div>
                     </td>
@@ -237,12 +237,12 @@ const ReviewsPage = () => {
               </div>
 
               <div style={{ display: 'flex', gap: 8, paddingTop: 8, borderTop: '1px solid var(--border)' }}>
-                {selected.status !== 'approved' && (
+                {selected.status !== 'Approved' && (
                   <button onClick={() => handleApprove(selected)} style={{ flex: 1, padding: '8px 0', borderRadius: 8, fontSize: 13, fontWeight: 600, background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', cursor: 'pointer', fontFamily: 'var(--sans)' }}>
                     ✓ Approve
                   </button>
                 )}
-                {selected.status !== 'rejected' && (
+                {selected.status !== 'Rejected' && (
                   <button onClick={() => handleReject(selected)} style={{ flex: 1, padding: '8px 0', borderRadius: 8, fontSize: 13, fontWeight: 600, background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', cursor: 'pointer', fontFamily: 'var(--sans)' }}>
                     ✕ Reject
                   </button>

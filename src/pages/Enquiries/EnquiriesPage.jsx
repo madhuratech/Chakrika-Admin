@@ -9,10 +9,11 @@ import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { SearchBar } from '../../components/ui/SearchBar'
 import apiService from '../../services/api'
 import {
-  MessageSquare, Mail, Phone, Calendar, Trash2, Eye,
+  MessageSquare, Mail, Phone, Calendar, Trash2, Eye, Send,
   CheckCircle, Clock, XCircle, Inbox, MailOpen,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import ReplyModal from './ReplyModal'
 
 const STATUS_COLORS = {
   new:        { bg: '#eff6ff', color: '#2563eb', label: 'New'        },
@@ -46,6 +47,7 @@ const EnquiriesPage = () => {
   const [statusFilter, setStatusFilter]     = useState('all')
   const [selected, setSelected]             = useState(null)
   const [isViewOpen, setIsViewOpen]         = useState(false)
+  const [isReplyOpen, setIsReplyOpen]       = useState(false)
   const [isDeleteOpen, setIsDeleteOpen]     = useState(false)
   const [deleting, setDeleting]             = useState(false)
 
@@ -84,16 +86,6 @@ const EnquiriesPage = () => {
     }
   }
 
-  const handleStatusChange = async (enq, newStatus) => {
-    try {
-      await apiService.patch(`/enquiries/${enq.id}/status`, { status: newStatus })
-      setEnquiries(prev => prev.map(e => e.id === enq.id ? { ...e, status: newStatus } : e))
-      if (selected?.id === enq.id) setSelected(prev => ({ ...prev, status: newStatus }))
-      toast.success('Status updated')
-    } catch {
-      toast.error('Failed to update status')
-    }
-  }
 
   const confirmDelete = async () => {
     setDeleting(true)
@@ -289,21 +281,48 @@ const EnquiriesPage = () => {
                 ))}
               </div>
             </div>
+            {/* Reply history */}
+            {selected.replies?.length > 0 && (
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>
+                  Previous Replies ({selected.replies.length})
+                </div>
+                {selected.replies.map((reply, i) => (
+                  <div key={reply.id} style={{
+                    background: '#f5f3ff', borderRadius: 10, padding: '14px 16px',
+                    borderLeft: '3px solid #7c3aed', marginBottom: 10,
+                  }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: '#7c3aed', marginBottom: 4 }}>
+                      {reply.subject || '(No subject)'}
+                    </div>
+                    <div style={{ fontSize: 13, color: 'var(--text-h)', lineHeight: 1.6, whiteSpace: 'pre-wrap', marginBottom: 8 }}>
+                      {reply.message}
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                      — {reply.replied_by} · {fmtDate(reply.created_at)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
-            {/* Quick reply mailto link */}
-            <a
-              href={`mailto:${selected.email}?subject=Re: ${encodeURIComponent(selected.subject || 'Your enquiry')}`}
+            {/* Send reply button */}
+            <button
+              onClick={() => setIsReplyOpen(true)}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8,
-                padding: '9px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600,
-                background: 'var(--primary)', color: '#fff', textDecoration: 'none',
-                width: 'fit-content',
+                padding: '10px 16px', borderRadius: 8,
+                background: '#2563eb', color: '#fff', border: 'none',
+                cursor: 'pointer', fontWeight: 600, fontSize: 13,
+                fontFamily: 'var(--sans)', width: 'fit-content',
+                transition: 'opacity 0.15s',
               }}
-              onClick={() => handleStatusChange(selected, 'replied')}
+              onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
+              onMouseLeave={e => e.currentTarget.style.opacity = '1'}
             >
-              <Mail size={14} /> Reply via Email
-            </a>
-
+              <Send size={16} />
+              Send Reply
+            </button>
             <div style={{ paddingTop: 8, borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
               <button
                 onClick={() => { setIsViewOpen(false); setIsDeleteOpen(true) }}
@@ -315,6 +334,13 @@ const EnquiriesPage = () => {
           </div>
         )}
       </SlideOverForm>
+
+      <ReplyModal
+        isOpen={isReplyOpen}
+        onClose={() => setIsReplyOpen(false)}
+        enquiry={selected}
+        onReplied={fetch}
+      />
 
       <ConfirmDialog
         isOpen={isDeleteOpen}

@@ -91,14 +91,8 @@ export const apiService = {
 
   async patch(endpoint, payload) {
     const ep = adminEndpoint(endpoint)
-    // Map toggle-status and order status endpoints
     if (ep.includes('/toggle-status')) {
       await API.patch(ep, payload || {})
-      return ok(null, 'Status updated')
-    }
-    if (ep.includes('/status')) {
-      const { status, ...rest } = payload || {}
-      await API.put(ep, { order_status: status || rest.order_status, ...rest })
       return ok(null, 'Status updated')
     }
     const res = await API.patch(ep, payload || {})
